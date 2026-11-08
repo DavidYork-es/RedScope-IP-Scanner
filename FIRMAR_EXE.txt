@@ -1,0 +1,31 @@
+FIRMA AUTHENTICODE DE REDSCOPE
+==============================
+
+La opcion "Firmar el ensamblado" de Visual Studio crea un nombre seguro de .NET,
+pero no muestra un editor verificado en Windows. Para ello se necesita Authenticode.
+
+RECOMENDACION PARA USO CORPORATIVO
+----------------------------------
+Solicitar al departamento IT un certificado corporativo de firma de codigo y que el
+editor sea autorizado mediante las politicas de seguridad de la empresa. Una firma
+identifica al editor y garantiza que el EXE no ha cambiado, pero no impide que un EDR
+avise por el comportamiento propio de un escaner de red.
+
+FIRMA DESDE EL ALMACEN DE CERTIFICADOS
+--------------------------------------
+Ejecutar despues de compilar Release, sustituyendo HUELLA y URL_TIMESTAMP por los datos
+facilitados por el emisor del certificado:
+
+signtool sign /sha1 HUELLA /fd SHA256 /tr URL_TIMESTAMP /td SHA256 /d "RedScope" "RedScope\bin\Release\RedScope.exe"
+
+VERIFICACION
+------------
+signtool verify /pa /v "RedScope\bin\Release\RedScope.exe"
+
+PowerShell tambien permite comprobar el resultado:
+
+Get-AuthenticodeSignature ".\RedScope\bin\Release\RedScope.exe" | Format-List Status,StatusMessage,SignerCertificate
+
+Un certificado autofirmado no elimina por si solo las advertencias de SmartScreen.
+Solo resulta adecuado para una empresa si IT distribuye previamente su raiz de confianza
+a los equipos autorizados. No se deben desactivar el antivirus ni las politicas de red.
