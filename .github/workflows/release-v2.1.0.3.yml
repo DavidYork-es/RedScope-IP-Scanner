@@ -1,0 +1,91 @@
+name: Build and draft RedScope v2.1.0.3
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/release-v2.1.0.3.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: redscope-release-v2.1.0.3
+  cancel-in-progress: false
+
+jobs:
+  build-and-draft:
+    name: Windows / .NET Framework 4.8
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - name: Checkout verified source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Locate MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Rebuild Release Any CPU
+        shell: pwsh
+        run: |
+          msbuild RedScope.sln /t:Rebuild /p:Configuration=Release /p:Platform="Any CPU" /p:TargetFrameworkVersion=v4.8 /v:minimal /m
+          if ($LASTEXITCODE -ne 0) { throw "MSBuild failed" }
+
+      - name: Validate EXE version and prepare portable ZIP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = 'RedScope/bin/Release/RedScope.exe'
+          if (-not (Test-Path -LiteralPath $exe)) { throw 'RedScope.exe was not produced' }
+          $version = (Get-Item -LiteralPath $exe).VersionInfo.FileVersion
+          if ($version -ne '2.1.0.3') { throw "Unexpected file version: $version" }
+
+          New-Item -ItemType Directory -Force -Path dist, dist/RedScope | Out-Null
+          Copy-Item -LiteralPath $exe -Destination 'dist/RedScope/RedScope.exe'
+
+          # Preserve any required runtime files, but never include source, secrets or debug symbols.
+          Get-ChildItem 'RedScope/bin/Release' -File |
+            Where-Object { $_.Extension -in @('.dll', '.config') } |
+            ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination 'dist/RedScope/' }
+
+          $readme = @'
+          RedScope IP Scanner Advanced v2.1.0.3
+          Author: DavidYork (@DavidYork-es)
+
+          Portable utility for IPv4 discovery and network diagnostics.
+          Requires Windows with .NET Framework 4.8.
+          Extract the archive and run RedScope.exe.
+          Scan only networks you own or are authorized to assess.
+
+          This binary is not Authenticode signed.
+          Windows SmartScreen and antivirus warnings may appear.
+          Repository: https://github.com/DavidYork-es/RedScope-IP-Scanner
+          '@
+          Set-Content -LiteralPath 'dist/RedScope/README.txt' -Value $readme -Encoding UTF8
+
+          $zip = 'dist/RedScope_v2.1.0.3_Windows_Portable.zip'
+          Compress-Archive -Path 'dist/RedScope' -DestinationPath $zip -CompressionLevel Optimal
+          $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLowerInvariant()
+          Set-Content -LiteralPath 'dist/SHA256SUMS.txt' -Value "$hash  RedScope_v2.1.0.3_Windows_Portable.zip" -Encoding ascii
+          Write-Host "Portable archive SHA256: $hash"
+
+      - name: Attach Windows package to a DRAFT GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = 'v2.1.0.3'
+          $assets = @(
+            'dist/RedScope_v2.1.0.3_Windows_Portable.zip',
+            'dist/SHA256SUMS.txt'
+          )
+          gh release view $tag --json isDraft 2>$null | Out-Null
+          if ($LASTEXITCODE -eq 0) {
+            throw "Release $tag already exists. Refusing to overwrite existing assets."
+          }
+          gh release create $tag @assets --draft --title "RedScope v2.1.0.3" --notes-file RELEASE_NOTES_v2.1.0.3.md --target "${{ github.sha }}"
+          if ($LASTEXITCODE -ne 0) { throw "Draft release creation failed" }
