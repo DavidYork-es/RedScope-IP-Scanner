@@ -1,0 +1,41 @@
+REDSCOPE v2.1.0.3 - PRUEBAS MANUALES DE ACEPTACION
+==================================================
+Fecha: 07/11/2026
+Autor: DavidYork (@DavidYork-es)
+Estado: El autor confirma compilacion y pruebas funcionales completadas el 08/11/2026.
+La lista C01-C20 se conserva como plan de regresion sin evidencia individual registrada.
+
+REGLAS:
+- Verificar que la exportacion CSV mantiene CR/LF/TAB y la eliminacion de BOM
+  sin excepciones y sin generar formulas activas.
+- Ejecutar pruebas de red únicamente en redes propias o expresamente autorizadas.
+- Compilar con COMPILAR_RELEASE.cmd usando .NET Framework 4.8 Targeting Pack.
+- No abrir un issue ni publicar Release hasta verificar todos los casos críticos.
+- En caso de error guardar texto del error y pasos reproducibles (sin IP ni datos privados).
+
+[ ] C01 - Rebuild Release|Any CPU con cero errores. Comprobar versión de archivo 2.1.0.3.
+[ ] C02 - Iniciar desde carpeta de sólo lectura o USB; no se crean archivos propios de configuración.
+[ ] C03 - Abrir Redes y poder seleccionar la PRIMERA interfaz de la lista.
+[ ] C04 - IP única local que responde ICMP; comprobar estado y latencia.
+[ ] C05 - Host sin ICMP con TCP abierto; comprobar estado Activo (TCP).
+[ ] C06 - Escaneo de /24: pausar, reanudar, detener, iniciar otro barrido.
+[ ] C07 - Cerrar la ventana durante ping, TCP y pausa; no lanzar errores ni quedar proceso colgado.
+[ ] C08 - Escaneo de 1, 254 y 4096 direcciones en red de laboratorio autorizada.
+[ ] C09 - 1024 puertos sueltos aceptados; 1025 distintos rechazados.
+[ ] C10 - 1024 puertos en rangos aceptados; 1025 rechazados.
+[ ] C11 - 1024 puertos sueltos + un puerto de catálogo no incluido: unión rechazada.
+[ ] C12 - Puertos duplicados entre catálogo y entrada manual cuentan una sola vez.
+[ ] C13 - CSV con comentario '=1+1', '+cmd', '-1+2', '@SUM(1;1)' y '  =2+2': al abrirlo en Excel, ninguno se ejecuta como fórmula.
+[ ] C14 - CSV con caracteres CR, LF, TAB, punto y coma y comillas: no se desordena ninguna columna/fila.
+[ ] C15 - IP pública: proveedor accesible y sin conexión, Actualizar, Copiar y Cerrar; validar mensaje.
+[ ] C16 - Durante varios barridos, comprobar GDI Objects en Administrador de tareas: sin crecimiento sostenido al repintar la tabla.
+[ ] C17 - Comprobar con Process Monitor que RedScope no escribe preferencias ni configuración en el Registro de Windows.
+[ ] C18 - Comprobar pausa, parada e IP pública bajo varias resoluciones/DPI.
+[ ] C19 - Confirmar que la ventana Acerca de indica DavidYork y no muestra empresa.
+[ ] C20 - Comprobar versión 2.1.0.3 de AssemblyFileVersion y app.manifest.
+
+LIMITACIONES Y OBSERVACIONES
+- La validación de IP pública es conservadora, no sustituye al registro oficial de bloques IANA actualizado.
+- La IP consultada es la de salida vista por el proveedor (puede pertenecer a VPN/proxy).
+- ICMP/DNS/GetIpNetTable son operaciones del SO y pueden actualizar cachés de Windows.
+- La portabilidad no elimina el requisito previo .NET Framework 4.8.
