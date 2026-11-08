@@ -1,0 +1,30 @@
+REDSCOPE v2.1.0.3 - VERIFICACION ESTATICA
+========================================
+Fecha: 07/11/2026
+Autor: DavidYork (@DavidYork-es)
+
+REALIZADO EN ENTORNO DE REVISION (SIN WINDOWS, VS2026 NI MSBUILD):
+[OK] El proyecto .vbproj incluye sus 15 archivos .vb, sin omisiones.
+[OK] AssemblyVersion, AssemblyFileVersion y app.manifest indican 2.1.0.3.
+[OK] AssemblyCompany está vacío y no hay referencias empresariales en los textos del proyecto.
+[OK] No se observan llamadas a Registry, My.Settings, SaveSetting ni GetSetting en los fuentes.
+[OK] Una fuente Bold compartida para CellFormatting, liberada en Dispose.
+[OK] Límite de 1.024 puertos en listas, rangos y unión final.
+[OK] Escaneo de puertos con cola de trabajadores acotada (máximo 8/IP).
+[OK] PublicIpService valida direcciones especiales de IPv4/IPv6 de forma conservadora.
+[OK] CSV neutraliza =,+,-,@ al principio de datos importados por hojas de cálculo.
+[OK] Función CsvValue limpiada con Convert.ToChar y literales de tipo Char.
+[OK] No se han detectado las constantes o funciones de caracteres no permitidas
+     en ninguno de los 15 archivos fuente VB.NET.
+[OK] Fin de escaneo aplica los resultados pendientes antes del resumen ARP.
+[OK] Cierre difiere Dispose hasta que terminan tareas de escaneo.
+[OK] COMPILAR_RELEASE.cmd sin BOM, con CRLF y preferencia por VS2026.
+
+NO REALIZADO: compilación real, pruebas de comportamiento en Windows, prueba de
+red, validación manual de fórmulas en Excel, inspección dinámica de recursos GDI,
+medición de rendimiento real, pruebas de instalación y ejecución en otro PC.
+
+ANTES DE RELEASE PUBLICA:
+- Ejecutar el checklist PRUEBAS_V2103.txt y registrar resultados.
+- Auditar licencias de iconos, datos OUI, titularidad y la licencia Open Source.
+- Completar README bilingüe y .gitignore en la fase de publicación.
