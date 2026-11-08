@@ -1,0 +1,128 @@
+﻿REDSCOPE v2.1.0.3
+==================
+
+ENTREGA DEL PROYECTO
+--------------------
+Esta entrega contiene el proyecto completo para Visual Studio y no incluye un EXE
+precompilado. Abre RedScope.sln y compila en Release / Any CPU cuando quieras probarlo.
+
+DESCRIPCION
+-----------
+Escaner IPv4 compacto para inventario y diagnostico de redes autorizadas.
+Aplicacion Windows Forms escrita en VB.NET y dirigida a .NET Framework 4.8.
+No utiliza paquetes NuGet ni DLL de terceros. La consulta opcional de IP publica usa
+servicios HTTPS externos solamente cuando el usuario pulsa el boton correspondiente.
+
+FUNCIONES PRINCIPALES
+---------------------
+- Rango unico, rangos completos, ultimo octeto, CIDR y varios rangos separados por ;
+- Iniciar, pausar/reanudar y detener sin bloquear la ventana.
+- Descubrimiento combinado por ICMP y conexiones TCP.
+- Deteccion de equipos que bloquean ping pero tienen un puerto seleccionado abierto.
+- Nombre DNS inverso con timeout.
+- MAC por ARP en la red local.
+- Fabricante mediante tabla OUI local embebida; nunca se envia la MAC a Internet.
+- Perfiles de puertos Basico, Web + remoto, Industrial y catalogo completo.
+- Puerto TCP 10001 identificado expresamente como Industrial / servidor serie.
+- Puertos y rangos de puertos personalizados.
+- Timeouts y concurrencia configurables.
+- Filtro instantaneo de resultados.
+- Comentarios editables durante la sesión, descartados al cerrar.
+- Exportacion CSV UTF-8 de las filas visibles.
+- Acciones contextuales: copiar IP/MAC, HTTP, HTTPS, SMB, RDP y ping continuo.
+- Selector de todas las IPv4 locales configuradas: Ethernet, Wi-Fi, VPN, túneles,
+  interfaces virtuales y adaptadores desconectados; sólo se aplica el rango elegido.
+- Deteccion redundante mediante interfaces .NET y configuracion WMI de Windows para
+  recuperar direcciones estaticas que algun controlador no exponga correctamente.
+- Interfaces activas y con gateway primero; adaptadores desconectados y direcciones
+  automaticas 169.254.x.x permanecen visibles al final.
+- Lectura directa, mediante la API de Windows, de rastros temporales presentes en la
+  cache ARP actual; no ejecuta arp.exe ni crea un historial propio.
+- Rastros ARP no verificados en el escaneo actual diferenciados mediante filas gris
+  claro, estado Rastro ARP y columna Ultima evidencia.
+- Icono real de RedScope en las cabeceras principal, redes locales y Acerca de.
+- Autoría visible: creador, diseñador y propietario DavidYork.
+- Seudónimo del autor: DavidYork. Cuenta de GitHub: @DavidYork-es.
+- Repositorio previsto: https://github.com/DavidYork-es/RedScope-IP-Scanner
+- No existe empresa editora declarada en los metadatos del ensamblado.
+- Boton IP PUBLICA junto a la ayuda, con formulario compacto, copia al portapapeles
+  y actualizacion manual.
+- Consulta de IP publica exclusivamente bajo demanda mediante HTTPS, con validacion
+  estricta de la respuesta y proveedor alternativo si el primero no responde.
+- Una sola instancia de la aplicacion.
+- Funcionamiento portable y sin estado: no lee ni escribe el Registro de Windows,
+  no crea configuraciones, historiales, logs ni carpetas auxiliares.
+- Perfil inicial Basico de 9 puertos y 12 trabajadores concurrentes.
+- Advertencia previa antes de barridos TCP intensivos.
+
+FORMATOS DE RANGO
+-----------------
+192.168.1.25                 IP unica
+192.168.1.1-254              Rango abreviado
+192.168.1.1-192.168.1.254    Rango completo
+192.168.1.0/24               Red CIDR; excluye red y broadcast cuando corresponde
+192.168.1.1-100;10.0.0.1-20  Varios rangos sin duplicados
+
+LIMITES DELIBERADOS
+-------------------
+- 65.536 direcciones IP por ejecucion.
+- 1.024 puertos TCP por barrido.
+- El boton Mi red limita a /24 una interfaz cuya subred real supere 4.096 hosts.
+
+COMPILACION
+-----------
+1. Abrir RedScope.sln con Visual Studio 2022/2026.
+2. Comprobar que esta instalado .NET Framework 4.8 Targeting Pack.
+3. Elegir Release / Any CPU y compilar.
+
+Tambien puede ejecutarse COMPILAR_RELEASE.cmd. El resultado se genera en:
+RedScope\bin\Release\RedScope.exe
+
+El EXE es autocontenido respecto al proyecto: icono, interfaz, perfiles y base OUI
+van embebidos. Windows debe tener .NET Framework 4.8, incluido de forma habitual
+en Windows 10/11 actualizado.
+
+USO RESPONSABLE
+---------------
+Utilizar exclusivamente en redes propias o para las que se disponga de autorizacion.
+RedScope no intenta autenticarse, explotar servicios ni modificar dispositivos.
+Un firewall, VLAN, VPN, proxy ARP o filtrado ICMP puede limitar los resultados.
+Aunque ICMP no este disponible por una politica del PC, el descubrimiento TCP continua.
+
+ATAJOS
+------
+F5       Iniciar
+F6       Pausar / reanudar
+Esc      Detener
+Ctrl+F   Buscar
+
+PORTABILIDAD Y PRIVACIDAD
+-------------------------
+No existe telemetria. RedScope v2.1.0.3 no accede al Registro de Windows y no conserva
+rangos, puertos, comentarios, equipos, preferencias ni la IP publica obtenida. Cada
+ejecucion comienza con sus valores seguros de fabrica y todo cambio vive exclusivamente
+en memoria hasta cerrar la aplicacion.
+
+La unica comunicacion externa incorporada es la consulta voluntaria de IP publica. Solo
+se realiza al abrir ese formulario o pulsar Actualizar y contacta por HTTPS, en orden, con
+api.ipify.org o checkip.amazonaws.com. Esos servicios ven necesariamente la IP de origen
+de la conexion, pero RedScope no les envia resultados del escaneo, MAC, rangos ni nombres.
+Si no se abre el formulario IP PUBLICA, no se realiza ninguna de estas peticiones.
+
+La exportacion CSV es la unica escritura disponible y se realiza solamente cuando el
+usuario pulsa Exportar, elige una ruta y confirma el guardado.
+
+Las claves HKCU\Software\RedScope que pudieran haber creado versiones 1.x se dejan
+intactas: v2 no las consulta, modifica ni elimina.
+
+
+CAMBIOS CORRECTIVOS 2.1.0.3
+--------------------------
+- Se limita la creacion de tareas TCP por equipo y se agrupan actualizaciones de pantalla.
+- Se corrigen la validacion de puertos, IP publica y exportacion CSV para Excel.
+- La ventana cancela el escaneo y espera la salida de los trabajadores antes de cerrar.
+- Se reutiliza la fuente grafica en la tabla para evitar recreaciones continuas.
+- Se prioriza Visual Studio 2026 en COMPILAR_RELEASE.cmd.
+- Consultar version.mod y PRUEBAS_V2103.txt para cambios y plan de validacion.
+- COMPILACION Y PRUEBAS FUNCIONALES CONFIRMADAS POR EL AUTOR EL 08/11/2026.
+  Sin informe automatizado independiente; la lista PRUEBAS_V2103.txt sigue siendo el plan de regresion.

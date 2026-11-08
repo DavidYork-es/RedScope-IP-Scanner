@@ -1,4 +1,4 @@
-REDSCOPE v2.1.0.3 - PRUEBAS MANUALES DE ACEPTACION
+﻿REDSCOPE v2.1.0.3 - PRUEBAS MANUALES DE ACEPTACION
 ==================================================
 Fecha: 07/11/2026
 Autor: DavidYork (@DavidYork-es)
