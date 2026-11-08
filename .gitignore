@@ -1,0 +1,38 @@
+# Visual Studio and MSBuild transient files
+.vs/
+**/bin/
+**/obj/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.cache
+*.tmp
+*.bak
+*.log
+
+# Build outputs: publish executables separately as GitHub Releases assets
+*.exe
+*.dll
+*.pdb
+*.mdb
+*.ilk
+*.tlog
+
+# Never commit signing keys and sensitive material
+*.pfx
+*.p12
+*.pem
+*.key
+*.snk
+
+# System and IDE metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Distribution archives are uploaded as release assets
+*.zip
+*.7z
+*.rar
