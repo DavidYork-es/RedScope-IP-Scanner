@@ -1,26 +1,21 @@
-name: Publish RedScope v2.1.0.3 when repository becomes public
+name: Verify published RedScope release when repository becomes public
 
-# This workflow does not change repository visibility.
-# It publishes ONLY the already-reviewed draft release after the owner
-# explicitly changes the repository from Private to Public in GitHub Settings.
+# This workflow does NOT publish or change repository visibility.
+# Release v2.1.0.3 was already published while the repository was private.
+# SourceForge integration can import it after the owner makes the repo public.
 on:
   public:
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: publish-redscope-v2.1.0.3
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  publish-reviewed-draft:
-    name: Validate and publish previously built release
+  verify-published-release:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Verify that the owner has made the repository public
+      - name: Verify public repository and published binary checksum
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -29,54 +24,22 @@ jobs:
           set -euo pipefail
           visibility="$(gh api "repos/$GH_REPO" --jq '.visibility')"
           if [[ "$visibility" != "public" ]]; then
-            echo "::error::Repository is not public. Nothing was published."
+            echo "::error::Repository is private; SourceForge cannot import the standard public Release."
             exit 1
           fi
-          echo "Visibility confirmed: public"
 
-      - name: Verify draft release, tag, binary asset and checksum
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          id="438144897"
-          release="repos/$GH_REPO/releases/$id"
+          release="repos/$GH_REPO/releases/438144897"
           tag="$(gh api "$release" --jq '.tag_name')"
           draft="$(gh api "$release" --jq '.draft')"
-          target="$(gh api "$release" --jq '.target_commitish')"
-          asset_count="$(gh api "$release" --jq '.assets | length')"
           zip_digest="$(gh api "$release" --jq '.assets[] | select(.name=="RedScope_v2.1.0.3_Windows_Portable.zip") | .digest')"
-          sums="$(gh api "$release" --jq '.assets[] | select(.name=="SHA256SUMS.txt") | .name')"
-
-          if [[ "$tag" != "v2.1.0.3" ]]; then
-            echo "::error::Unexpected release tag"; exit 1
+          checksum_name="$(gh api "$release" --jq '.assets[] | select(.name=="SHA256SUMS.txt") | .name')"
+          if [[ "$tag" != "v2.1.0.3" || "$draft" != "false" ]]; then
+            echo "::error::Release v2.1.0.3 is missing or unpublished."; exit 1
           fi
-          if [[ "$draft" != "true" ]]; then
-            echo "::error::Release is not the expected unpublished draft"; exit 1
+          if [[ "$zip_digest" != "sha256:4deddbc113cbac76d64e8b41adcb1a52da385c254e87fc13e1ba68c2145ea57e" ]]; then
+            echo "::error::The distributable ZIP differs from the user-validated asset."; exit 1
           fi
-          if [[ "$target" != "3d031b073c5a8af14a57a11ac5454a199a4767cb" ]]; then
-            echo "::error::Unexpected release source commit"; exit 1
+          if [[ "$checksum_name" != "SHA256SUMS.txt" ]]; then
+            echo "::error::SHA256SUMS.txt is missing."; exit 1
           fi
-          if [[ "$asset_count" != "2" || "$sums" != "SHA256SUMS.txt" ]]; then
-            echo "::error::Release asset set changed"; exit 1
-          fi
-          if [[ "$zip_digest" != "sha256:b957897fff86c18d12980df127e85269b93f2aaea348d1ddf5d73662f0b0ee6c" ]]; then
-            echo "::error::Portable ZIP SHA-256 changed"; exit 1
-          fi
-          echo "Draft and original Windows release package verified."
-
-      - name: Publish the existing release without replacing assets
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh release edit v2.1.0.3 --draft=false --latest
-          draft="$(gh api "repos/$GH_REPO/releases/438144897" --jq '.draft')"
-          if [[ "$draft" != "false" ]]; then
-            echo "::error::The release remains a draft"; exit 1
-          fi
-          echo "Published v2.1.0.3. SourceForge may now import the GitHub release."
+          echo 'Public repository and released ZIP verified. SourceForge can now import the published GitHub release.'
